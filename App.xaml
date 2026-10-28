@@ -1,0 +1,45 @@
+﻿<Application x:Class="FlareVpn.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FlareVpn">
+    <Application.Resources>
+        <DrawingImage x:Key="VpnGsLogo">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#171A25">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="#343A4A" Thickness="3"/>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Geometry>
+                            <EllipseGeometry Center="50,50" RadiusX="47" RadiusY="47"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#202433">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="#FF6B35" Thickness="3" LineJoin="Round"/>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry Figures="M50,10 C61,17 72,20 82,22 L82,48 C82,67 69,81 50,91 C31,81 18,67 18,48 L18,22 C28,20 39,17 50,10 Z"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing>
+                        <GeometryDrawing.Brush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#FFFFB547" Offset="0"/>
+                                <GradientStop Color="#FFFF6B35" Offset="1"/>
+                            </LinearGradientBrush>
+                        </GeometryDrawing.Brush>
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry Figures="M56,22 L35,53 L48,53 L42,77 L67,43 L54,43 Z"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#FFFFB547">
+                        <GeometryDrawing.Geometry>
+                            <EllipseGeometry Center="69,31" RadiusX="3" RadiusY="3"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </Application.Resources>
+</Application>

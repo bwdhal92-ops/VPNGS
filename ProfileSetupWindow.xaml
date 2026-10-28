@@ -1,0 +1,23 @@
+<Window x:Class="FlareVpn.ProfileSetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="إعداد ملف VPNGS" Width="440" Height="320" MinWidth="420" MinHeight="300"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" FlowDirection="RightToLeft"
+        Background="#10131B" Foreground="#E8ECF2" FontFamily="Segoe UI" ShowInTaskbar="False">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/><RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="مرحبًا بك في VPNGS" FontSize="21" FontWeight="Bold" Foreground="#FF7043"/>
+        <TextBlock Grid.Row="1" Text="اكتب اسم عرض لتمييز ملفك على هذا الجهاز. يمكنك استخدام اسم مستعار."
+                   TextWrapping="Wrap" Foreground="#AAB4C5" Margin="0,10,0,18"/>
+        <TextBox x:Name="DisplayNameBox" Grid.Row="2" Height="42" Padding="12,8" FontSize="15"
+                 Background="#191E2A" Foreground="#F4F6FA" CaretBrush="#FF7043" BorderBrush="#343B4D"
+                 MaxLength="60" VerticalContentAlignment="Center" ToolTip="اسم العرض"/>
+        <TextBlock Grid.Row="3" Text="سيُسجّل اسم العرض وإصدار التطبيق وأوقات الاستخدام والأعطال المختصرة في Firebase لإدارة المستخدمين وتحسين البرنامج. لا تُرسل عناوين السيرفرات أو سجل الاتصال الكامل."
+                   Margin="0,16,0,10" Foreground="#8F9AAF" FontSize="11" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <Button Grid.Row="4" Content="حفظ ومتابعة" Height="42" Background="#FF6B35" Foreground="White"
+                BorderThickness="0" FontWeight="SemiBold" Click="Save_Click"/>
+    </Grid>
+</Window>
