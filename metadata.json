@@ -1,0 +1,6 @@
+{
+  "name": "VPNGS",
+  "description": "Fast and secure VPN client supporting VLESS, VMess, Trojan, Hysteria2, TUIC protocols, server probing, speed testing, and profile management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

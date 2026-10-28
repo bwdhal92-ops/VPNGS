@@ -1,30 +1,27 @@
-# VPNGS
+# VPNGS - Android Application
 
-تطبيق سطح مكتب (WPF / .NET 10) للاتصال بالإنترنت عبر سيرفرات FlareFeed (VLESS/VMess/Trojan/Hysteria2/TUIC) باستخدام محرك sing-box.
+VPNGS is a high-performance Android VPN client app built with Kotlin, Jetpack Compose, and Material Design 3.
 
-## الميزات
-- جلب تلقائي لقائمة السيرفرات من FlareFeed (مع مرايا بديلة).
-- فحص استجابة UDP عبر النفق واختيار أفضل سيرفر اجتاز الفحص.
-- اتصال بضغطة زر (System Proxy أو TUN Mode).
-- تحديث تلقائي كل 60 دقيقة.
-- دعم VLESS Reality, Hysteria2, TUIC.
+## Features
 
-## المتطلبات
-- Windows 10/11 (x64)
-- .NET 10 SDK (للبناء)
-- صلاحيات Administrator (فقط لوضع TUN)
+- **Protocol Support**: Full support for VLESS, VMess, Trojan, Hysteria2, and TUIC proxy nodes.
+- **Multi-Mirror Subscription Fetcher**: Auto-fetches and parses servers from multiple mirrors with offline caching fallback.
+- **Smart Probing & Scanning**: Real-time STUN/UDP ping latency measurement, Web reachability check, and download speed estimation.
+- **Smart Category Filtering**:
+  - **All**: Browse all available proxy servers.
+  - **Games (UDP)**: Filters servers that successfully pass UDP probes for low-latency gaming.
+  - **Browse**: Filters servers optimized for web browsing.
+  - **Stream**: Orders servers by highest estimated download bandwidth for video streaming.
+- **Smart Auto-Select**: Automatically routes connections to the highest-performing server based on your active filter.
+- **JSON Config Inspector**: Generates production-ready SingBox and Xray JSON configuration files for any server.
+- **Custom Links & Subscriptions**: Easily import individual VLESS/VMess links or add custom subscription URLs.
+- **User Profile & Settings**: Custom profile display names, TUN mode toggle, SOCKS5 & HTTP proxy port configuration, and theme customization.
+- **Diagnostics Console**: Direct manual speed testing and real-time system event logs.
 
-## البناء
-```powershell
-cd FlareVpn
-dotnet build
-```
+## Tech Stack
 
-## التشغيل
-شغّل `bin\VPNGS\VPNGS.exe` أو ملف `VPNGS.bat` في مجلد المشروع الرئيسي.
-
-الثنائيات (sing-box.exe, wintun.dll) موجودة في `bin/` وتنسخ تلقائياً إلى مجلد الإخراج.
-
-## ملاحظات
-- وضع TUN يتطلب wintun.dll (مضمن) وصلاحيات Administrator.
-- وضع System Proxy (الافتراضي) لا يتطلب صلاحيات.
+- **Language**: Kotlin
+- **UI Framework**: Jetpack Compose (Material 3)
+- **Architecture**: MVVM with StateFlow
+- **Networking**: OkHttp
+- **Persistence**: Preferences DataStore & JSON serialization

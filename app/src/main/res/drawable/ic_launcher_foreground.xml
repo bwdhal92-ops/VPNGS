@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Shield & Flame VPN Icon -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M54,18 L30,28 V50 C30,68.4 40.2,85.2 54,90 C67.8,85.2 78,68.4 78,50 V28 L54,18 Z" />
+    <path
+        android:fillColor="#1A237E"
+        android:pathData="M54,24 L35,32 V50 C35,64.8 43.1,78.3 54,82.2 C64.9,78.3 73,64.8 73,50 V32 L54,24 Z" />
+    <!-- Inner Flame / Flare -->
+    <path
+        android:fillColor="#FF9100"
+        android:pathData="M54,34 C54,34 44,48 44,58 C44,63.5 48.5,68 54,68 C59.5,68 64,63.5 64,58 C64,48 54,34 54,34 Z" />
+    <path
+        android:fillColor="#FFD600"
+        android:pathData="M54,44 C54,44 48,52 48,58 C48,61.3 50.7,64 54,64 C57.3,64 60,61.3 60,58 C60,52 54,44 54,44 Z" />
+</vector>
