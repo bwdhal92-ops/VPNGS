@@ -7,6 +7,7 @@ import com.example.models.VpnServer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -20,6 +21,12 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class SubscriptionRepository(private val context: Context) {
+
+    private data class MirrorResult(val url: String, val body: String? = null, val error: String? = null)
+
+    @Volatile
+    var lastFetchDiagnostics: List<String> = emptyList()
+        private set
 
     val mirrorUrls = listOf(
         "https://vless.svinakraft.workers.dev/fastest.txt",
@@ -67,21 +74,13 @@ class SubscriptionRepository(private val context: Context) {
 
     suspend fun fetchServers(customUrls: List<String> = emptyList()): Pair<String, List<VpnServer>> = withContext(Dispatchers.IO) {
         val allUrls = customUrls + mirrorUrls
-        val fetchedTexts = mutableListOf<String>()
-        val sources = mutableListOf<String>()
-
-        coroutineScope {
-            val deferreds = allUrls.take(6).map { url ->
-                async { fetchSingleMirror(url) }
-            }
-            deferreds.forEach { def ->
-                val res = def.await()
-                if (res != null) {
-                    fetchedTexts.add(res.second)
-                    sources.add(res.first)
-                }
-            }
+        val results = coroutineScope {
+            allUrls.take(6).map { url -> async { fetchSingleMirror(url) } }.awaitAll()
         }
+        val fetched = results.filter { it.body != null }
+        val fetchedTexts = fetched.mapNotNull { it.body }
+        val sources = fetched.map { it.url }
+        lastFetchDiagnostics = results.mapNotNull { result -> result.error?.let { "${result.url} -> $it" } }
 
         val combinedText = if (fetchedTexts.isNotEmpty()) {
             val joined = fetchedTexts.joinToString("\n")
@@ -100,21 +99,30 @@ class SubscriptionRepository(private val context: Context) {
         if (parsedServers.isNotEmpty()) {
             val sourceLabel = if (sources.isNotEmpty()) sources.take(2).joinToString(" + ") else "المخزن المحلي"
             Pair(sourceLabel, parsedServers)
-        } else Pair("لا توجد مصادر متاحة", emptyList())
+        } else {
+            if (fetchedTexts.isNotEmpty()) {
+                lastFetchDiagnostics = lastFetchDiagnostics + "وصلت استجابة من المرايا لكن لم يُعثر على روابط VLESS/VMess/Trojan/Hysteria2/TUIC قابلة للتحليل."
+            } else if (lastFetchDiagnostics.isEmpty()) {
+                lastFetchDiagnostics = listOf("لم تُرجع المرايا بيانات، ولا توجد قائمة محفوظة صالحة.")
+            }
+            Pair("لا توجد مصادر متاحة", emptyList())
+        }
     }
 
-    private fun fetchSingleMirror(url: String): Pair<String, String>? {
+    private fun fetchSingleMirror(url: String): MirrorResult {
         return try {
             val request = Request.Builder().url(url).build()
-            val response = httpClient.newCall(request).execute()
-            if (response.isSuccessful) {
-                val body = response.body?.string()
-                if (!body.isNullOrBlank() && body.contains("://")) {
-                    Pair(url, body)
-                } else null
-            } else null
+            httpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    MirrorResult(url, error = "HTTP ${response.code}")
+                } else {
+                    val body = response.body?.string()
+                    if (!body.isNullOrBlank() && body.contains("://")) MirrorResult(url, body = body)
+                    else MirrorResult(url, error = "HTTP ${response.code}, empty or non-subscription response")
+                }
+            }
         } catch (e: Exception) {
-            null
+            MirrorResult(url, error = "${e::class.java.simpleName}: ${e.localizedMessage ?: "network error"}")
         }
     }
 
@@ -126,10 +134,20 @@ class SubscriptionRepository(private val context: Context) {
         for (rawLine in lines) {
             val line = rawLine.trim()
             if (line.isBlank() || line.startsWith("#")) continue
-            val token = line.replace(" ", "%20")
-            if (!token.contains("://")) continue
-            val server = parseLink(token)
+            // Feeds append human-readable metadata after ` | `. That suffix is not part
+            // of the URI (and its pipe/emoji makes java.net.URI reject the whole line).
+            val link = line.substringBefore('|').trim()
+            if (!link.contains("://")) continue
+            val server = parseLink(link.replace(" ", "%20"))
             if (server != null) {
+                val metadata = line.substringAfter('|', "").substringBefore('|').trim()
+                val feedCountry = guessCountry(metadata)
+                if (feedCountry.isNotBlank()) {
+                    server.country = feedCountry
+                    if (!server.remark.contains(feedCountry, ignoreCase = true)) {
+                        server.remark = "$feedCountry • ${server.remark}".trim()
+                    }
+                }
                 if (seenIds.add(server.id)) {
                     list.add(server)
                 }

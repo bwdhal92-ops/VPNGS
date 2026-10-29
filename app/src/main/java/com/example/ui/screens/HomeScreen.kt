@@ -268,17 +268,32 @@ fun HomeScreen(
             }
         } else {
             if (servers.isEmpty()) {
-                Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(
                         text = when (platformFilter) {
                             "games" -> "لا توجد نتائج UDP مؤكدة بعد. فحص UDP يحتاج محرك VPN Android."
                             "browse" -> "فحص التصفح عبر النفق غير متاح حتى دمج محرك VPN Android."
                             "stream" -> "لا توجد نتائج سرعة تنزيل فعلية بعد. لن نعرض أرقامًا تقديرية."
-                            else -> "لم يتم العثور على خوادم. حدّث القائمة أو تحقق من اتصال الإنترنت."
+                            else -> statusMessage.ifBlank { "لم يتم العثور على خوادم. تحقق من اتصال الإنترنت." }
                         },
                         color = TextMuted,
                         fontSize = 13.sp
                     )
+                    if (platformFilter == "all") {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = { viewModel.loadServers() },
+                            colors = ButtonDefaults.buttonColors(containerColor = FlameCyan, contentColor = CyberDarkBg)
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("إعادة جلب السيرفرات")
+                        }
+                    }
                 }
             } else LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),

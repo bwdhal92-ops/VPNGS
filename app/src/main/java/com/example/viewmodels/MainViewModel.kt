@@ -164,8 +164,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val (source, fetched) = subscriptionRepo.fetchServers(currentSettings.customSubscriptions)
                 if (fetched.isEmpty()) {
-                    _statusMessage.value = "تعذر جلب الخوادم؛ القائمة المحفوظة إن وُجدت ما زالت متاحة."
-                    log("Servers", "لم تصل قائمة قابلة للاستخدام من المرايا أو الكاش.")
+                    val detail = subscriptionRepo.lastFetchDiagnostics.firstOrNull()
+                    _statusMessage.value = if (detail.isNullOrBlank()) {
+                        "تعذر جلب الخوادم؛ القائمة المحفوظة إن وُجدت ما زالت متاحة."
+                    } else {
+                        "تعذر جلب السيرفرات: ${detail.substringAfter(" -> ", detail).take(120)}"
+                    }
+                    log("Servers/ERROR", _statusMessage.value)
+                    subscriptionRepo.lastFetchDiagnostics.forEach { log("Servers/MIRROR", it) }
                     return@launch
                 }
 
