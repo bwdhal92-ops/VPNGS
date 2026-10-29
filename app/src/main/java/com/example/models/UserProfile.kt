@@ -10,5 +10,7 @@ data class UserProfile(
     val createdAtEpochMs: Long = System.currentTimeMillis(),
     val firebaseUid: String = "",
     val activeSessionId: String? = null,
-    val activeProfileId: String? = null
+    val activeProfileId: String? = null,
+    val activeSessionStartedAtEpochMs: Long? = null,
+    val lastHeartbeatAtEpochMs: Long? = null
 )

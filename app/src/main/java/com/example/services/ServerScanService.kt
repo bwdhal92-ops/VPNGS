@@ -2,21 +2,14 @@ package com.example.services
 
 import com.example.models.VpnServer
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import java.net.InetSocketAddress
 import java.net.Socket
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 class ServerScanService {
-
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.SECONDS)
-        .build()
 
     suspend fun scanServers(
         servers: List<VpnServer>,
@@ -25,7 +18,7 @@ class ServerScanService {
         val total = servers.size
         var completed = 0
 
-        servers.chunked(10).flatMap { batch ->
+        servers.chunked(20).flatMap { batch ->
             batch.map { server ->
                 async {
                     val scanned = scanSingleServer(server)
@@ -42,39 +35,20 @@ class ServerScanService {
     suspend fun scanSingleServer(server: VpnServer): VpnServer = withContext(Dispatchers.IO) {
         if (server.id == "auto") return@withContext server
 
-        val start = System.currentTimeMillis()
-        var latency: Double? = null
-        var udpPassed: Boolean? = true
-        var webPassed: Boolean? = true
-        var speedMbps: Double? = null
-
-        try {
+        val latency = try {
+            val start = System.nanoTime()
             Socket().use { socket ->
-                socket.connect(InetSocketAddress(server.host, server.port), 2500)
-                val duration = (System.currentTimeMillis() - start).toDouble()
-                latency = duration
-                udpPassed = true
-                webPassed = true
+                socket.connect(InetSocketAddress(server.host, server.port), 1800)
             }
+            (System.nanoTime() - start) / 1_000_000.0
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            // Fallback latency estimation so node remains selectable and functional
-            latency = 90.0 + Random.nextDouble(10.0, 150.0)
-            udpPassed = true
-            webPassed = true
+            null
         }
-
-        val baseSpeed = when {
-            server.isCloudflare -> 18.0 + Random.nextDouble(5.0, 20.0)
-            (latency ?: 100.0) < 120 -> 42.0 + Random.nextDouble(10.0, 40.0)
-            else -> 22.0 + Random.nextDouble(5.0, 25.0)
-        }
-        speedMbps = Math.round(baseSpeed * 10.0) / 10.0
-
         server.copy(
-            udpLatencyMs = Math.round((latency ?: 120.0) * 10.0) / 10.0,
-            udpProbePassed = udpPassed,
-            webProbePassed = webPassed,
-            downloadMbps = speedMbps
+            tcpLatencyMs = latency?.let { Math.round(it * 10.0) / 10.0 },
+            tcpReachable = latency != null
         )
     }
 
@@ -92,7 +66,7 @@ class ServerScanService {
                 }
             }.thenBy {
                 if (filter == "stream") -(it.downloadMbps ?: 0.0)
-                else it.udpLatencyMs ?: 999.0
+                else it.tcpLatencyMs ?: Double.MAX_VALUE
             }.thenBy { it.displayName }
         )
 
@@ -100,10 +74,10 @@ class ServerScanService {
         if (autoNode != null) {
             val best = getRecommendedServer(regularServers, filter)
             val label = when {
-                best == null -> "التحديد التلقائي الذكي - جاهز للاتصال"
-                filter == "games" -> "أقل قياس STUN/UDP: ${best.displayName} (${best.udpLatencyMs?.toInt() ?: 95} ms)"
-                filter == "stream" -> "أفضل تنزيل للمشاهدة: ${best.displayName} (${best.downloadMbps ?: 35.0} Mbps)"
-                else -> "أفضل خادم موصى به: ${best.displayName} (${best.udpLatencyMs?.toInt() ?: 110} ms)"
+                best == null -> "لا توجد نتيجة اختبار حقيقية بعد"
+                filter == "games" -> "أفضل UDP مختبر: ${best.displayName} (${best.udpLatencyMs?.toInt()} ms)"
+                filter == "stream" -> "أفضل تنزيل مختبر: ${best.displayName} (${best.downloadMbps} Mbps)"
+                else -> "أقل زمن TCP مقاس: ${best.displayName} (${best.tcpLatencyMs?.toInt() ?: 0} ms)"
             }
             autoNode.remark = label
             result.add(autoNode)
@@ -113,24 +87,20 @@ class ServerScanService {
     }
 
     fun getRecommendedServer(servers: List<VpnServer>, filter: String): VpnServer? {
-        val regular = servers.filter { it.id != "auto" }
+        val regular = servers.filter { it.id != "auto" && it.tcpReachable == true }
         if (regular.isEmpty()) return null
 
-        val candidates = regular.filter { it.udpProbePassed == true }
-        val pool = if (candidates.isNotEmpty()) candidates else regular
-
-        val filteredCandidates = when (filter) {
-            "games" -> pool.filter { it.udpProbePassed == true }
-            "browse" -> pool.filter { it.webProbePassed == true }
-            "stream" -> pool.filter { it.downloadMbps != null }
-            else -> pool
+        val targetPool = when (filter) {
+            "games" -> regular.filter { it.udpProbePassed == true }
+            "browse" -> regular.filter { it.webProbePassed == true }
+            "stream" -> regular.filter { it.downloadMbps != null }
+            else -> regular
         }
-
-        val targetPool = if (filteredCandidates.isNotEmpty()) filteredCandidates else pool
+        if (targetPool.isEmpty()) return null
 
         return targetPool.minByOrNull {
             if (filter == "stream") -(it.downloadMbps ?: 0.0)
-            else it.udpLatencyMs ?: 999.0
+            else it.tcpLatencyMs ?: Double.MAX_VALUE
         } ?: regular.firstOrNull()
     }
 }

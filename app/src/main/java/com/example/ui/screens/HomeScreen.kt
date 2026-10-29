@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -62,6 +65,7 @@ import com.example.ui.theme.SuccessGreen
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
+import com.example.R
 import com.example.viewmodels.MainViewModel
 
 @Composable
@@ -111,12 +115,15 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "VPNGS • FlareVPN",
-                        color = FlameCyan,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_launcher_foreground),
+                            contentDescription = "شعار VPNGS",
+                            modifier = Modifier.size(30.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("VPNGS", color = FlameCyan, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    }
                     Text(
                         text = if (connectionStatus != ConnectionStatus.DISCONNECTED) connectionStepMessage else statusMessage,
                         color = TextSecondary,
@@ -138,7 +145,7 @@ fun HomeScreen(
                     }
 
                     IconButton(
-                        onClick = { viewModel.scanAndSort() },
+                        onClick = { viewModel.loadServers() },
                         modifier = Modifier.testTag("refresh_scan_button")
                     ) {
                         if (scanProgress != null) {
@@ -150,7 +157,7 @@ fun HomeScreen(
                         } else {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "تحديث الفحص",
+                                contentDescription = "تحديث قائمة الخوادم",
                                 tint = TextPrimary
                             )
                         }
@@ -213,14 +220,11 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(14.dp))
 
         // Category Filter Chips (All, Games, Browse, Stream)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            PlatformFilterChip(filterKey = "all", label = "الكل", isSelected = platformFilter == "all", onSelect = { viewModel.setPlatformFilter("all") })
-            PlatformFilterChip(filterKey = "games", label = "الألعاب UDP", isSelected = platformFilter == "games", onSelect = { viewModel.setPlatformFilter("games") })
-            PlatformFilterChip(filterKey = "browse", label = "التصفح", isSelected = platformFilter == "browse", onSelect = { viewModel.setPlatformFilter("browse") })
-            PlatformFilterChip(filterKey = "stream", label = "المشاهدة", isSelected = platformFilter == "stream", onSelect = { viewModel.setPlatformFilter("stream") })
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            item { PlatformFilterChip(filterKey = "all", label = "الكل", isSelected = platformFilter == "all", onSelect = { viewModel.setPlatformFilter("all") }) }
+            item { PlatformFilterChip(filterKey = "games", label = "الألعاب UDP", isSelected = platformFilter == "games", onSelect = { viewModel.setPlatformFilter("games") }) }
+            item { PlatformFilterChip(filterKey = "browse", label = "التصفح", isSelected = platformFilter == "browse", onSelect = { viewModel.setPlatformFilter("browse") }) }
+            item { PlatformFilterChip(filterKey = "stream", label = "المشاهدة", isSelected = platformFilter == "stream", onSelect = { viewModel.setPlatformFilter("stream") }) }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -263,7 +267,20 @@ fun HomeScreen(
                 }
             }
         } else {
-            LazyColumn(
+            if (servers.isEmpty()) {
+                Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = when (platformFilter) {
+                            "games" -> "لا توجد نتائج UDP مؤكدة بعد. فحص UDP يحتاج محرك VPN Android."
+                            "browse" -> "فحص التصفح عبر النفق غير متاح حتى دمج محرك VPN Android."
+                            "stream" -> "لا توجد نتائج سرعة تنزيل فعلية بعد. لن نعرض أرقامًا تقديرية."
+                            else -> "لم يتم العثور على خوادم. حدّث القائمة أو تحقق من اتصال الإنترنت."
+                        },
+                        color = TextMuted,
+                        fontSize = 13.sp
+                    )
+                }
+            } else LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxSize()

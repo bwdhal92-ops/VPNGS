@@ -4,7 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AppSettings(
-    val tunMode: Boolean = true,
+    // Keep disabled until the Android VpnService/libbox engine is integrated.
+    val tunMode: Boolean = false,
     val autoRefresh: Boolean = true,
     val refreshMinutes: Int = 60,
     val selectedServerId: String = "auto",

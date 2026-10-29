@@ -4,18 +4,12 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Shield & Flame VPN Icon -->
-    <path
-        android:fillColor="#00E5FF"
-        android:pathData="M54,18 L30,28 V50 C30,68.4 40.2,85.2 54,90 C67.8,85.2 78,68.4 78,50 V28 L54,18 Z" />
-    <path
-        android:fillColor="#1A237E"
-        android:pathData="M54,24 L35,32 V50 C35,64.8 43.1,78.3 54,82.2 C64.9,78.3 73,64.8 73,50 V32 L54,24 Z" />
-    <!-- Inner Flame / Flare -->
-    <path
-        android:fillColor="#FF9100"
-        android:pathData="M54,34 C54,34 44,48 44,58 C44,63.5 48.5,68 54,68 C59.5,68 64,63.5 64,58 C64,48 54,34 54,34 Z" />
-    <path
-        android:fillColor="#FFD600"
-        android:pathData="M54,44 C54,44 48,52 48,58 C48,61.3 50.7,64 54,64 C57.3,64 60,61.3 60,58 C60,52 54,44 54,44 Z" />
+    <!-- Brand-matched shield and flare, based on the desktop VPNGS mark. -->
+    <path android:fillColor="#171A25" android:strokeColor="#343A4A" android:strokeWidth="2"
+        android:pathData="M54,7 A47,47 0,1 1,53.9 7 Z" />
+    <path android:fillColor="#202433" android:strokeColor="#FF6B35" android:strokeWidth="3"
+        android:pathData="M54,17 L78,26 L78,48 C78,67 68,81 54,90 C40,81 30,67 30,48 L30,26 Z" />
+    <path android:fillColor="#FFFFB547"
+        android:pathData="M57,29 L41,53 L51,53 L46,76 L68,46 L57,46 Z" />
+    <path android:fillColor="#FFFFB547" android:pathData="M72,31 A3,3 0,1 1,66 31 A3,3 0,1 1,72 31" />
 </vector>

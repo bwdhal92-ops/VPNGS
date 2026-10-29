@@ -25,9 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,14 +48,7 @@ fun AdvancedScreen(
     modifier: Modifier = Modifier
 ) {
     val selectedServer by viewModel.selectedServer.collectAsState()
-    var logs by remember {
-        mutableStateOf(
-            "[System] VPNGS Core initialized.\n" +
-            "[DNS] Using 1.1.1.1 DoH resolver.\n" +
-            "[Scan] Initialized multi-mirror subscription fetcher.\n" +
-            "[Proxy] Ready for SingBox / Xray runtime engine."
-        )
-    }
+    val logs by viewModel.logs.collectAsState()
 
     Column(
         modifier = modifier
@@ -85,7 +75,7 @@ fun AdvancedScreen(
                 .border(1.dp, CyberCardBorder, RoundedCornerShape(16.dp))
                 .padding(16.dp)
         ) {
-            Text("اختبار أداء السيرفر المحدد", color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            Text("فحص اتصال TCP", color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             Text(
                 text = "السيرفر الحالي: ${selectedServer?.displayName ?: "غير محدد"}",
                 color = TextMuted,
@@ -96,7 +86,6 @@ fun AdvancedScreen(
 
             Button(
                 onClick = {
-                    logs += "\n[Manual Probe] Triggered UDP & Web probe on ${selectedServer?.displayName ?: "auto"}..."
                     viewModel.scanAndSort()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = FlameCyan, contentColor = CyberDarkBg),
@@ -106,7 +95,7 @@ fun AdvancedScreen(
             ) {
                 Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("تشغيل فحص الاستجابة الفوري", fontWeight = FontWeight.Bold)
+                Text("إعادة فحص TCP لكل الخوادم", fontWeight = FontWeight.Bold)
             }
         }
 
@@ -130,7 +119,7 @@ fun AdvancedScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = logs,
+                text = logs.joinToString("\n"),
                 color = SuccessGreen,
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace,
@@ -139,6 +128,12 @@ fun AdvancedScreen(
                     .clip(RoundedCornerShape(8.dp))
                     .background(CyberDarkBg)
                     .padding(12.dp)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                "تنبيه: فحوص UDP والتصفح وسرعة التنزيل ومحرك الاتصال غير مدمجة في هذه النسخة بعد؛ لن تظهر نتائج تقديرية.",
+                color = TextMuted,
+                fontSize = 12.sp
             )
         }
     }

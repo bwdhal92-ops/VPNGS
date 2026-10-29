@@ -26,6 +26,8 @@ data class VpnServer(
     var country: String = "",
     var verifiedExitCountry: String? = null,
     var verifiedExitCountryCode: String? = null,
+    var tcpLatencyMs: Double? = null,
+    var tcpReachable: Boolean? = null,
     var udpLatencyMs: Double? = null,
     var udpProbePassed: Boolean? = null,
     var webProbePassed: Boolean? = null,
@@ -53,7 +55,7 @@ data class VpnServer(
         get() {
             if (id == "auto") return "الأفضل"
             val parts = mutableListOf<String>()
-            parts.add(udpLatencyMs?.let { String.format(Locale.US, "%.1f ms STUN/UDP", it) } ?: "— STUN/UDP")
+            parts.add(tcpLatencyMs?.let { String.format(Locale.US, "%.1f ms TCP", it) } ?: "— TCP")
             udpProbePassed?.let { parts.add(if (it) "U✓" else "U✕") }
             webProbePassed?.let { parts.add(if (it) "W✓" else "W✕") }
             downloadMbps?.let { parts.add(String.format(Locale.US, "↓%.1f Mbps", it)) }

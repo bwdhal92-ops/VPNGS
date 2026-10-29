@@ -9,7 +9,7 @@ import kotlinx.serialization.json.put
 
 class ConfigGeneratorService {
 
-    fun generateSingBoxConfig(server: VpnServer, socksPort: Int = 10808, httpPort: Int = 10809, tunMode: Boolean = true): String {
+    fun generateSingBoxConfig(server: VpnServer, socksPort: Int = 10808, httpPort: Int = 10809, tunMode: Boolean = false): String {
         val outboundObj = buildOutbound(server)
 
         val root = buildJsonObject {

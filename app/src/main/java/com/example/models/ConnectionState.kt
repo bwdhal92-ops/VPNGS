@@ -1,7 +1,7 @@
 package com.example.models
 
 enum class ConnectionStatus {
-    DISCONNECTED, CONNECTING, CONNECTED, DISCONNECTING
+    DISCONNECTED, CONNECTING, CONNECTED, DISCONNECTING, ERROR
 }
 
 data class ConnectionStats(

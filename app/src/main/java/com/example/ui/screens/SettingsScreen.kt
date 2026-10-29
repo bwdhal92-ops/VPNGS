@@ -93,9 +93,10 @@ fun SettingsScreen(
             SettingRowToggle(
                 icon = Icons.Default.VpnLock,
                 title = "وضع النفق الكامل (TUN Mode)",
-                subtitle = "توجيه جميع حركة المرور في الجهاز عبر نفق VPN",
-                checked = settings.tunMode,
-                onCheckedChange = { viewModel.updateSettings(settings.copy(tunMode = it)) }
+                subtitle = "محرك النفق الخاص بـ Android غير مربوط في هذه النسخة حتى الآن",
+                checked = false,
+                onCheckedChange = { viewModel.updateSettings(settings.copy(tunMode = it)) },
+                enabled = false
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -231,7 +232,8 @@ fun SettingRowToggle(
     title: String,
     subtitle: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -253,6 +255,7 @@ fun SettingRowToggle(
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
+            enabled = enabled,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = CyberDarkBg,
                 checkedTrackColor = FlameCyan,

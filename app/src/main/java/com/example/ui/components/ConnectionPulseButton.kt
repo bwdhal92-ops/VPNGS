@@ -64,6 +64,7 @@ fun ConnectionPulseButton(
         ConnectionStatus.CONNECTED -> SuccessGreen
         ConnectionStatus.CONNECTING -> FlameOrange
         ConnectionStatus.DISCONNECTING -> ErrorRed
+        ConnectionStatus.ERROR -> ErrorRed
         ConnectionStatus.DISCONNECTED -> FlameCyan
     }
 
@@ -117,6 +118,7 @@ fun ConnectionPulseButton(
                         ConnectionStatus.CONNECTED -> "إيقاف"
                         ConnectionStatus.CONNECTING -> "جاري الاتصال..."
                         ConnectionStatus.DISCONNECTING -> "جاري الفصل..."
+                        ConnectionStatus.ERROR -> "غير متاح"
                         ConnectionStatus.DISCONNECTED -> "اتصال"
                     },
                     color = TextPrimary,

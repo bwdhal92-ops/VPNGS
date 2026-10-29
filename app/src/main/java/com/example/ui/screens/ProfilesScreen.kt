@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Check
@@ -62,6 +64,7 @@ fun ProfilesScreen(
             .fillMaxSize()
             .background(CyberDarkBg)
             .padding(20.dp)
+            .verticalScroll(rememberScrollState())
             .testTag("profiles_screen")
     ) {
         Text(
@@ -71,7 +74,7 @@ fun ProfilesScreen(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "إدارة هويتك وتزامن إعدادات الاتصال في VPNGS",
+            text = "إدارة الاسم الظاهر والهوية المحلية على هذا الجهاز",
             color = TextMuted,
             fontSize = 13.sp
         )
@@ -169,8 +172,8 @@ fun ProfilesScreen(
                 Text("معلومات الجلسة والتأمين", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(10.dp))
-            Text("• جميع الاتصالات مشفرة ببروتوكولات VLESS / VMess / Hysteria2.", color = TextMuted, fontSize = 12.sp)
-            Text("• يدعم الخروج المؤكد عبر عقد خوادم متعددة.", color = TextMuted, fontSize = 12.sp)
+            Text("• الاسم ومعرّف التثبيت محفوظان محليًا؛ تُرسل بيانات الجلسة المجهولة إلى Firebase عند توفر الشبكة.", color = TextMuted, fontSize = 12.sp)
+            Text("• تُستخدم بيانات الإصدار ووقت الجلسة والأعطال المختصرة للإدارة؛ لا تُرسل روابط السيرفرات.", color = TextMuted, fontSize = 12.sp)
         }
     }
 }

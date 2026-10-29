@@ -136,9 +136,9 @@ fun ServerCard(
                     text = server.pingLabel,
                     color = when {
                         server.id == "auto" -> FlameOrange
-                        server.udpLatencyMs == null -> TextMuted
-                        server.udpLatencyMs!! < 120 -> SuccessGreen
-                        server.udpLatencyMs!! < 280 -> FlameCyan
+                        server.tcpLatencyMs == null -> TextMuted
+                        server.tcpLatencyMs!! < 120 -> SuccessGreen
+                        server.tcpLatencyMs!! < 280 -> FlameCyan
                         else -> ErrorRed
                     },
                     fontSize = 12.sp,
