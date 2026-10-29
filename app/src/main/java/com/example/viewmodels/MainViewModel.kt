@@ -298,17 +298,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleConnection() {
         val server = _selectedServer.value ?: run { _statusMessage.value = "اختر خادمًا أولًا"; return }
+        val app = getApplication<Application>()
         if (connectionStatus.value == ConnectionStatus.CONNECTED || connectionStatus.value == ConnectionStatus.CONNECTING) {
-            vpnServiceManager.disconnect()
+            vpnServiceManager.disconnect(app)
             _statusMessage.value = "تم إيقاف الاتصال"
         } else if (server.id == "auto") {
-            val target = serverScanService.getRecommendedServer(_servers.value, _platformFilter.value)
-            if (target == null) {
-                _statusMessage.value = "لا توجد نتيجة اختبار فعلية مناسبة لهذا الفلتر بعد"
-                return
-            }
-            vpnServiceManager.connect(target)
-        } else vpnServiceManager.connect(server)
+            val target = serverScanService.getRecommendedServer(_servers.value, _platformFilter.value) ?: server
+            vpnServiceManager.connect(app, target)
+        } else {
+            vpnServiceManager.connect(app, server)
+        }
         _statusMessage.value = vpnServiceManager.connectionStepMessage.value
     }
 
