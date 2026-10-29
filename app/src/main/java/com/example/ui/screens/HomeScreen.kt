@@ -78,6 +78,7 @@ fun HomeScreen(
     val isLoading by viewModel.isLoadingServers.collectAsState()
     val statusMessage by viewModel.statusMessage.collectAsState()
     val connectionStatus by viewModel.connectionStatus.collectAsState()
+    val connectionStepMessage by viewModel.connectionStepMessage.collectAsState()
     val connectionStats by viewModel.connectionStats.collectAsState()
     val scanProgress by viewModel.scanProgress.collectAsState()
 
@@ -117,7 +118,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = statusMessage,
+                        text = if (connectionStatus != ConnectionStatus.DISCONNECTED) connectionStepMessage else statusMessage,
                         color = TextSecondary,
                         fontSize = 12.sp,
                         maxLines = 1

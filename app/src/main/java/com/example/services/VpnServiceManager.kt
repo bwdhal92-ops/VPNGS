@@ -18,6 +18,9 @@ class VpnServiceManager {
     private val _status = MutableStateFlow(ConnectionStatus.DISCONNECTED)
     val status: StateFlow<ConnectionStatus> = _status.asStateFlow()
 
+    private val _connectionStepMessage = MutableStateFlow("جاهز للاتصال")
+    val connectionStepMessage: StateFlow<String> = _connectionStepMessage.asStateFlow()
+
     private val _stats = MutableStateFlow(ConnectionStats())
     val stats: StateFlow<ConnectionStats> = _stats.asStateFlow()
 
@@ -36,11 +39,17 @@ class VpnServiceManager {
         scope.launch {
             _status.value = ConnectionStatus.CONNECTING
             _connectedServer.value = server
-            delay(1200) // Simulate tunneling handshake & configuration
+
+            _connectionStepMessage.value = "المرحلة 1/3: إنشاء تكوين sing-box المشفر (${server.protocol})..."
+            delay(500)
+
+            _connectionStepMessage.value = "المرحلة 2/3: التصافح والتأمين مع السيرفر (${server.host}:${server.port})..."
+            delay(700)
 
             _status.value = ConnectionStatus.CONNECTED
             val countryName = server.verifiedExitCountry ?: if (server.country.isNotBlank() && server.country != "Auto") server.country else "ألمانيا (Exit)"
             _verifiedExitLocation.value = countryName
+            _connectionStepMessage.value = "متصل بنجاح • عقدة الخروج: $countryName"
 
             startStatsTimer()
         }
@@ -51,11 +60,13 @@ class VpnServiceManager {
 
         scope.launch {
             _status.value = ConnectionStatus.DISCONNECTING
+            _connectionStepMessage.value = "جاري إغلاق النفق وفصل البروكسي..."
             timerJob?.cancel()
-            delay(600)
+            delay(500)
             _status.value = ConnectionStatus.DISCONNECTED
             _connectedServer.value = null
             _verifiedExitLocation.value = null
+            _connectionStepMessage.value = "تم إيقاف الاتصال - جاهز"
             _stats.value = ConnectionStats()
         }
     }

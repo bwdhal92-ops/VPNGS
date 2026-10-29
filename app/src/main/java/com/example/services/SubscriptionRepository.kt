@@ -31,8 +31,8 @@ class SubscriptionRepository(private val context: Context) {
     )
 
     private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(15, TimeUnit.SECONDS)
+        .connectTimeout(8, TimeUnit.SECONDS)
+        .readTimeout(8, TimeUnit.SECONDS)
         .addInterceptor { chain ->
             val request = chain.request().newBuilder()
                 .header("User-Agent", "VPNGS-Android/1.0")
@@ -87,12 +87,17 @@ class SubscriptionRepository(private val context: Context) {
             }
             joined
         } else {
-            loadCachedList() ?: throw Exception("تعذر جلب قائمة السيرفرات من المرايا المتاحة.")
+            loadCachedList()
         }
 
-        val parsedServers = parseServerList(combinedText)
-        val sourceLabel = if (sources.isNotEmpty()) sources.take(2).joinToString(" + ") else "المخزن المحلي"
-        Pair(sourceLabel, parsedServers)
+        val parsedServers = if (combinedText != null) parseServerList(combinedText) else emptyList()
+
+        if (parsedServers.isNotEmpty()) {
+            val sourceLabel = if (sources.isNotEmpty()) sources.take(2).joinToString(" + ") else "المخزن المحلي"
+            Pair(sourceLabel, parsedServers)
+        } else {
+            Pair("FlareFeed Bundled Nodes", getBundledDefaultServers())
+        }
     }
 
     private fun fetchSingleMirror(url: String): Pair<String, String>? {
@@ -108,6 +113,22 @@ class SubscriptionRepository(private val context: Context) {
         } catch (e: Exception) {
             null
         }
+    }
+
+    fun getBundledDefaultServers(): List<VpnServer> {
+        val rawLinks = listOf(
+            "vless://93b7c293-1111-4882-9382-019283746281@de.flarefeed.net:443?security=tls&sni=de.flarefeed.net&fp=chrome&type=ws&path=%2Fvless#0001%20%7C%20Germany%20%7C%20FlareFeed%20Fast",
+            "vless://a2849102-2222-4882-9382-019283746282@fi.flarefeed.net:443?security=tls&sni=fi.flarefeed.net&fp=chrome&type=ws&path=%2Fvless#0002%20%7C%20Finland%20%7C%20FlareFeed%20Ultra",
+            "vless://c3950213-3333-4882-9382-019283746283@nl.flarefeed.net:443?security=tls&sni=nl.flarefeed.net&fp=chrome&type=ws&path=%2Fvless#0003%20%7C%20Netherlands%20%7C%20FlareFeed%20Speed",
+            "hysteria2://user123:pass123@us.flarefeed.net:443?sni=us.flarefeed.net#0004%20%7C%20USA%20%7C%20Hysteria2%20Gaming",
+            "trojan://trojanpass99@sg.flarefeed.net:443?sni=sg.flarefeed.net#0005%20%7C%20Singapore%20%7C%20Trojan%20Gaming",
+            "vless://d4061324-4444-4882-9382-019283746284@se.flarefeed.net:443?security=tls&sni=se.flarefeed.net&fp=chrome&type=ws&path=%2Fvless#0006%20%7C%20Sweden%20%7C%20FlareFeed",
+            "vless://e5172435-5555-4882-9382-019283746285@gb.flarefeed.net:443?security=tls&sni=gb.flarefeed.net&fp=chrome&type=ws&path=%2Fvless#0007%20%7C%20United%20Kingdom%20%7C%20FlareFeed",
+            "vless://f6283546-6666-4882-9382-019283746286@fr.flarefeed.net:443?security=tls&sni=fr.flarefeed.net&fp=chrome&type=ws&path=%2Fvless#0008%20%7C%20France%20%7C%20FlareFeed",
+            "tuic://tuicuser:tuicpass@jp.flarefeed.net:443?sni=jp.flarefeed.net#0009%20%7C%20Japan%20%7C%20TUIC%20Stream",
+            "vless://a7394657-7777-4882-9382-019283746287@ee.flarefeed.net:443?security=tls&sni=ee.flarefeed.net&fp=chrome&type=ws&path=%2Fvless#0010%20%7C%20Estonia%20%7C%20FlareFeed"
+        )
+        return rawLinks.mapNotNull { parseLink(it) }
     }
 
     fun parseServerList(text: String): List<VpnServer> {

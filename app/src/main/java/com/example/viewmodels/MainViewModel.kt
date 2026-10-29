@@ -62,6 +62,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val scanProgress: StateFlow<Pair<Int, Int>?> = _scanProgress.asStateFlow()
 
     val connectionStatus: StateFlow<ConnectionStatus> = vpnServiceManager.status
+    val connectionStepMessage: StateFlow<String> = vpnServiceManager.connectionStepMessage
     val connectionStats: StateFlow<ConnectionStats> = vpnServiceManager.stats
     val verifiedExitLocation: StateFlow<String?> = vpnServiceManager.verifiedExitLocation
 
@@ -80,8 +81,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val autoNode = VpnServer.createAutoNode()
                 val fullList = mutableListOf(autoNode).apply { addAll(parsed) }
 
-                _servers.value = fullList
+                val sortedList = serverScanService.sortServersByPerformance(fullList, _platformFilter.value)
+                _servers.value = sortedList
                 _statusMessage.value = "تم جلب ${parsed.size} سيرفر من $source"
+                applyFilter()
+
+                if (_selectedServer.value == null) {
+                    _selectedServer.value = sortedList.firstOrNull()
+                }
 
                 // Auto probe servers in background
                 scanAndSort()
